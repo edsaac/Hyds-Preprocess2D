@@ -37,7 +37,10 @@ def buildT3S_3Col(Col1,Col2,Col3):
         T3S.append(line)
     return(T3S)
 def appendFile(what, whereToFile = pathToT3SFile):
-    #if lalalala hola edwion
+<<<<<<< HEAD
+=======
+    #if lalalala lñeooee
+    
     with open(whereToFile,"a") as outFile:
         for i in range(len(what)):
             outFile.write(str(what[i]) + "\n")
