@@ -47,7 +47,7 @@
             "console": "integratedTerminal",
             "args"   : ["l",
                 "../CSV_Files/Lines.csv",
-                "../GEO_Files/Boundary.geo"]
+                "../GEO_Files/Boundari.geo"]
         },
 
 

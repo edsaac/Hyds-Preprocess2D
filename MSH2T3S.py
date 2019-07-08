@@ -1,7 +1,38 @@
-import csv, sys, os, re
+#
+#////////////////////////////////////////////////////////////////////////
+#                                                                       #
+#                                 MSG2T3S.py                            # 
+#                                                                       #
+#////////////////////////////////////////////////////////////////////////
+#
+# Author:     Edwin
+# 
+# Date:       July 8, 2019
+#
+# Modified:   July 8, 2019
+#
+# Works on:   python3
+#
+# Purpose:    Script takes in a MSH file generated on gmsh and produces 
+#             a t3s mesh file (MSH) recognized by BlueKenue(C)
+#
+# Needs:      Python3, csv, sys, os, shutil
+#
+# Usage:      python3 MSH2T3S.py <input.msh> <output.t3s>
+#
+# where:
+# --> input.msh: a string that defines the path to MSH file from where the
+#                gmsh mesh is to be read.
+#
+# --> output.t3s: a string that defines the path to the T3S file where the 
+#                 BlueKenue mesh will be written.                       
+#
+# Bibliography & Useful links:
+# -- https://github.com/pprodano/pputils
+#
+#////////////////////////////////////////////////////////////////////////
 
-## mesh.msh >> mesh.t3s
-## use: python3 mesh.msh mesh.t3s
+import csv, sys, os, re
 
 ##INPUT File
 pathToMSHFile = str(sys.argv[1])
@@ -36,7 +67,6 @@ def buildT3S_3Col(Col1,Col2,Col3):
         line = str(Col1[i]) + " " + str(Col2[i]) + " " + str(Col3[i])
         T3S.append(line)
     return(T3S)
-
 def appendFile(what, whereToFile = pathToT3SFile,isString = False):
     if not isString :
         with open(whereToFile,"a") as outFile:

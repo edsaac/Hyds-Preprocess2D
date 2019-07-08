@@ -51,7 +51,7 @@
 # --> output.geo: a string that defines the path to the GEO file where the 
 #                 geometrical entities will be written.                       
 #
-#Bibliography & Useful links:
+# Bibliography & Useful links:
 # -- http://gmsh.info/doc/texinfo/gmsh.html#Points
 # -- https://github.com/pprodano/pputils
 #
@@ -103,10 +103,10 @@ def getColumn(xID):
         header = getCommaFile(pathToCSVFile,row=0)
         return(header.index(xID))
     except ValueError:
-        print("X column could not be found")
+        print(str(xID) + " column could not be found")
 def resetFile(nameFile):
     with open(nameFile,"w") as outFile:
-        outFile.write('P=0;\nL=0;\nLL=0;\nPS=0;\n\n')
+        outFile.write('P=1;\nL=1;\nLL=1;\nPS=0;\n\n')
         outFile.close()
 def appendFile(appendy, nameFile = pathToGEOFile):
     with open(nameFile,"a") as outFile:
@@ -161,9 +161,8 @@ def setColumn(column):
 ###############################################
 xColumnID = "X_m"
 yColumnID = "Y_m"
-rColumnID = "R_m"
+iColumnID = "vertex_ind"
 holeColID = "vertex_par"
-lineColID = "DN"
 paragraphSeparator = ['\n',"/**********************************/",'\n\n']
 ###############################################
 
@@ -184,17 +183,17 @@ for i in range(len(zCoord)):
 zCoord = list(zCoord)
 
 #Create Index
-iCoord = list(range(1,len(xCoord)+1))
-
-#Extract Refinement values
-rCoord = getCommaFile(pathToCSVFile,col=getColumn(rColumnID))
-rCoord.remove(rColumnID)
-
+iCoord = getCommaFile(pathToCSVFile,col=getColumn(iColumnID))
+iCoord.remove(iColumnID)
 
 ########### EXECUTION CASES ###########
 # Boundary Mode 
 
 if execMode in ["b", "boundary"]:
+    rColumnID = "Rx_m"
+    #Extract Refinement values
+    rCoord = getCommaFile(pathToCSVFile,col=getColumn(rColumnID))
+    rCoord.remove(rColumnID)
 
     #Extract hole flager
     holeCol = getCommaFile(pathToCSVFile,col=getColumn(holeColID))
@@ -231,14 +230,14 @@ if execMode in ["b", "boundary"]:
         #Convert to GEO Lines
         LINES1 = list(iCoord[start:end])
         LINES2 = list((iCoord[start+1:end]))+[iCoord[start]]
-        INDEXLINES = list(iCoord[start:end])
+        INDEXLINES = list(range(start,end))
 
         GEO_Lines = buildGEOLines(INDEXLINES,LINES1,LINES2)
         appendFile(GEO_Lines)
 
         #Generate GEO Line Loop
         GEO_Loops = ["Line Loop (LL+" + \
-            str(hole+1) + ") = {L+" + \
+            str(hole) + ") = {L+" + \
             str(min(INDEXLINES)) + " ... L+" +  \
             str(max(INDEXLINES)) + "};\n"\
                 ]
@@ -247,21 +246,27 @@ if execMode in ["b", "boundary"]:
 
     #Generate GEO Plane Surface
     appendFile(paragraphSeparator)
-    GEO_Surface = ["Plane Surface (PS+1) = {" + \
-        str(min(iCoord)) + " ... " + \
-        str(len(holeListID)) + "};\n"\
+    GEO_Surface = ["Plane Surface (PS+1) = {LL+" + \
+        str(min(iCoord)) + " ... " + "LL+" + \
+        str(len(holeListID)-1) + "};\n"\
             ]
     appendFile(GEO_Surface)
     
     #Update index starts
     appendFile(paragraphSeparator)
-    addLastIndex("P",str(max(iCoord)))
-    addLastIndex("L",str(max(INDEXLINES)))
-    addLastIndex("LL",str(hole))
-    addLastIndex("PS",str(len(GEO_Surface)))
+    addLastIndex("P",str(len(xCoord)),True)
+    addLastIndex("L",str(max(INDEXLINES)),True)
+    addLastIndex("L",str(1),True)
+    addLastIndex("LL",str(hole),True)
+    addLastIndex("PS",str(len(GEO_Surface)),True)
     appendFile(paragraphSeparator)
 
 elif execMode in ["p", "pointsinsurface"]:
+    rColumnID = "R_m"
+    #Extract Refinement values
+    rCoord = getCommaFile(pathToCSVFile,col=getColumn(rColumnID))
+    rCoord.remove(rColumnID)
+    
     #Convert to GEO Points   
     GEO_Points = buildGEOPoints(xCoord,yCoord,zCoord,iCoord,rCoord)
     appendFile(GEO_Points)
@@ -279,6 +284,12 @@ elif execMode in ["p", "pointsinsurface"]:
 
 elif execMode in ["l", "linesinsurface"]:
     
+    lineColID = "DN"
+    rColumnID = "R_m"
+    #Extract Refinement values
+    rCoord = getCommaFile(pathToCSVFile,col=getColumn(rColumnID))
+    rCoord.remove(rColumnID)
+
     #Extract line identifier
     lineCol = getCommaFile(pathToCSVFile,col=getColumn(lineColID))
     lineCol.remove(lineColID)
@@ -318,13 +329,17 @@ elif execMode in ["l", "linesinsurface"]:
 
         #Add as Lines in Surface
         appendFile(paragraphSeparator)
-        GEO_LinesInSurface = ["Line {L+" + str(min(INDEXLINES)) + \
-            " ... L+" + str(max(INDEXLINES)) +\
+        GEO_LinesInSurface = ["Line {L+" + str(INDEXLINES[0]) + \
+            " ... L+" + str(INDEXLINES[-1]) +\
             "} In Surface { 1 } ;\n"]
         appendFile(GEO_LinesInSurface)
     
-    #Update index starts
-    appendFile(paragraphSeparator)
-    addLastIndex("P",str(max(iCoord)),True)
-    addLastIndex("L",str(max(INDEXLINES)),True)
-    appendFile(paragraphSeparator)
+        #Update index starts
+        appendFile(paragraphSeparator)
+        addLastIndex("P",str(INDEXLINES[-1]),True)
+        addLastIndex("P",str(2),True)
+        addLastIndex("L",str(INDEXLINES[-1]),True)
+        addLastIndex("L",str(1),True)
+        appendFile(paragraphSeparator)
+    
+appendFile("//END OF BLOCK//\n\n\n")

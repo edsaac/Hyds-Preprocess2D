@@ -22,7 +22,9 @@ import sys, getopt
 # if __name__ == "__main__":
 #    main(sys.argv[1:])
 
-listado = ["10","10","11","1","1"]
-ocurr = list(set(listado))
+listado = ["A","B","C","D","E"]
+indice = [5,4,2,3,1]
 
-print(max(listado))
+tupla = list(zip(listado,indice))
+tupla.sort()
+print(tupla)
