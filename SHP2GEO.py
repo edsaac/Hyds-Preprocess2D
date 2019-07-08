@@ -1,4 +1,62 @@
-##https://gis.stackexchange.com/questions/279874/using-qgis3-processing-algorithms-from-standalone-pyqgis-scripts-outside-of-gui
+#
+#////////////////////////////////////////////////////////////////////////
+#                                                                       #
+#                                 SHP2GEO.py                            # 
+#                                                                       #
+#////////////////////////////////////////////////////////////////////////
+#
+# Author:     Edwin
+# 
+# Date:       July 8, 2019
+#
+# Modified:   July 8, 2019
+#
+# Works on:   python3
+#
+# Purpose:    Script takes in a group of ESRI vector files (SHP) of a 
+#             geometry and produces a geometry file (CSV) used by the 
+#             buildGEO.py  program to generate a geometry file (GEO) used 
+#             by gmsh.
+#
+# Needs:      Python3, sys, os, shutil, qgis.bin
+#
+# Usage:      python3 buildGEO.py <mode> <input.csv> <output.geo>
+#
+# where:
+# --> mode: a string that defines how the script will behave according 
+#           to the type of vector file used as input. SHP files may 
+#           correspond to polygons, lines or points.
+#
+#     --> p: a polygon SHP is taken to define the boundaries of the 
+#            computational domain. It may contain ring (holes) in its 
+#            configuration. Only one attribute is necessary defining the
+#            element size which has to be called "R_m"
+#
+#     --> l: a line SHP is taken to define hard lines on the 
+#            computational domain. It may contain as many lines as desired, 
+#            however, they have to be inside the computational domain. 
+#            Closed polygons generate errors when meshing. One attribute 
+#            is necesary defining the element size which has to be called 
+#            "R_m"
+#
+#     --> v: a points SHP is taken to define hard points on the 
+#            computational domain. It may contain as many points as desired, 
+#            however, they have to be inside the computational domain. 
+#            Repeated points generate errors when meshing. One attribute 
+#            is necesary defining the element size which has to be called 
+#            "R_m"
+#
+# --> input.shp: a string that defines the path to the ESRI vector file from 
+#                which the geometry will be taken.
+#
+# --> output.csv: a string that defines the path to the CSV file where the 
+#                 geometrical entities will be written                       
+#
+#Bibliography & Useful links:
+# -- https://gis.stackexchange.com/questions/279874/using-qgis3-processing-algorithms-from-standalone-pyqgis-scripts-outside-of-gui
+# -- https://github.com/pprodano/pputils
+#
+#////////////////////////////////////////////////////////////////////////
 
 import sys, os, shutil
 from pathlib import Path
