@@ -36,6 +36,7 @@ def buildT3S_3Col(Col1,Col2,Col3):
         line = str(Col1[i]) + " " + str(Col2[i]) + " " + str(Col3[i])
         T3S.append(line)
     return(T3S)
+
 def appendFile(what, whereToFile = pathToT3SFile,isString = False):
     if not isString :
         with open(whereToFile,"a") as outFile:
@@ -46,6 +47,7 @@ def appendFile(what, whereToFile = pathToT3SFile,isString = False):
         with open(whereToFile,"a") as outFile:
             outFile.write(str(what))
             outFile.close()
+
 def resetT3SFile(nameFile):
     with open(nameFile,"w") as outFile:
         outFile.write('')
