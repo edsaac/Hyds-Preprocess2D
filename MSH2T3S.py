@@ -36,17 +36,16 @@ def buildT3S_3Col(Col1,Col2,Col3):
         line = str(Col1[i]) + " " + str(Col2[i]) + " " + str(Col3[i])
         T3S.append(line)
     return(T3S)
-def appendFile(what, whereToFile = pathToT3SFile):
-    #if lalalala hola edwion
-    with open(whereToFile,"a") as outFile:
-        for i in range(len(what)):
-            outFile.write(str(what[i]) + "\n")
-        outFile.close()
-    #elif type
-    with open(whereToFile,"a") as outFile:
-        for i in range(len(what)):
-            outFile.write(str(what[i]) + "\n")
-        outFile.close()
+def appendFile(what, whereToFile = pathToT3SFile,isString = False):
+    if not isString :
+        with open(whereToFile,"a") as outFile:
+            for i in range(len(what)):
+                outFile.write(str(what[i]) + "\n")
+            outFile.close()
+    else:
+        with open(whereToFile,"a") as outFile:
+            outFile.write(str(what))
+            outFile.close()
 def resetT3SFile(nameFile):
     with open(nameFile,"w") as outFile:
         outFile.write('')
@@ -59,27 +58,27 @@ def filterMSHElement(listElements,dimension = 2):
             filteredElements.append(listElements[i])
     return filteredElements
 def buildT3S_Header(nNodes,nElements):
-    header = "#########################################################################\n\
-        :FileType t3s  ASCII  EnSim 1.0\
-        # Edwin Hydraulics Centre/Saavedra Research Council (~c~) 1111-2222\
-        # DataType                 2D T3 Scalar Mesh\
-        #\
-        :Application              BlackKenue\
-        :Version                  3.3.4\
-        :WrittenBy                edwin\
-        :CreationDate             Fri, Jul 04, 2019 12:00 PM\
-        #\
-        #------------------------------------------------------------------------\
-        :SourceFile   Z:file.excel\
-        #\
-        #\
-        :AttributeName 1 BOTTOM FRICTION\
-        #\
-        :NodeCount " + str(nNodes) +"\
-        :ElementCount " + str(nElements) + "\
-        :ElementType  T3\
-        #\
-        :EndHeader"
+    header = "#########################################################################\
+        \n:FileType t3s  ASCII  EnSim 1.0\
+        \n# Edwin Hydraulics Centre/Saavedra Research Council (~c~) 1111-2222\
+        \n# DataType                 2D T3 Scalar Mesh\
+        \n#\
+        \n:Application              BlackKenue\
+        \n:Version                  3.3.4\
+        \n:WrittenBy                edwin\
+        \n:CreationDate             Fri, Jul 04, 2019 12:00 PM\
+        \n#\
+        \n#------------------------------------------------------------------------\
+        \n:SourceFile   Z:file.excel\
+        \n#\
+        \n#\
+        \n:AttributeName 1 BOTTOM FRICTION\
+        \n#\
+        \n:NodeCount " + str(nNodes) +"\
+        \n:ElementCount " + str(nElements) + "\
+        \n:ElementType  T3\
+        \n#\
+        \n:EndHeader\n"
     return(header)
 
 #Touch T3S File
@@ -123,7 +122,7 @@ Elements_T3S  = buildT3S_3Col(p1Elements_MSH,p2Elements_MSH,p3Elements_MSH)
 Header_T3S  = buildT3S_Header(manyNodes,manyElements)
 
 #Write Files
-appendFile(Header_T3S,pathToT3SFile)
+appendFile(Header_T3S,pathToT3SFile,True)
 appendFile(Nodes_T3S,pathToT3SFile)
 appendFile(Elements_T3S,pathToT3SFile)
 
