@@ -182,7 +182,7 @@ for i in range(len(zCoord)):
     zCoord[i] = float(zCoord[i])*0
 zCoord = list(zCoord)
 
-#Create Index
+#Extract Index
 iCoord = getCommaFile(pathToCSVFile,col=getColumn(iColumnID))
 iCoord.remove(iColumnID)
 

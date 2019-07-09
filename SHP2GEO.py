@@ -28,13 +28,13 @@
 #           correspond to polygons, lines or points.
 #
 #     --> p: a polygon SHP is taken to define the boundaries of the 
-#            computational domain. It may contain ring (holes) in its 
-#            configuration. Only one attribute is necessary defining the
+#            computational domain. It may contain rings (holes) in its 
+#            configuration. Only one attribute is necessary to define the
 #            element size which has to be called "R_m". 
 #
 #     --> i: a polygon SHP is taken to define the boundaries of the 
-#            computational domain. It may contain ring (holes) in its 
-#            configuration. Only one attribute is necessary defining the
+#            computational domain. It may contain rings (holes) in its 
+#            configuration. Only one attribute is necessary to define the
 #            element size which has to be called "R_m". An additional polygon
 #            SHP is added to define different "R_m" values on the vertices
 #            of the boundary polygon on the <optional.shp> field. 

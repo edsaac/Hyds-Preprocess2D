@@ -11,8 +11,8 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args"   : [
-                "../GEO_Files/Boundary.msh",
-                "../T3S_Files/Boundary.t3s"]
+                "../GEO_Files/Boundari.msh",
+                "../T3S_Files/Boundari.t3s"]
         },
 
         {
