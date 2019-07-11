@@ -211,10 +211,7 @@ yCoord = getCommaFile(pathToCSVFile,col=getColumn(yColumnID))
 yCoord.remove(yColumnID)
 
 #Extract Z-coordinates as a list [ Just a list of zeros ]
-zCoord = list(range(len(xCoord)))
-for i in range(len(zCoord)):
-    zCoord[i] = float(zCoord[i])*0
-zCoord = list(zCoord)
+zCoord = ["0.00"] * (len(xCoord))
 
 #////////////////////////////////////////////////////////////////////////
 
