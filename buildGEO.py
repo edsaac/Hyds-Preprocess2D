@@ -59,6 +59,10 @@
 
 import csv, sys, os, shutil
 
+#Retrieve path of files from the arguments passed to the script
+pathToCSVFile = str(sys.argv[2])            #CSV  input file 
+pathToGEOFile = str(sys.argv[3])            #GEO output file
+
 #////////////////////////////////////////////////////////////////////////
 #                         def Functions                                 #
 #////////////////////////////////////////////////////////////////////////
@@ -177,10 +181,6 @@ def setColumn(column):
     return result
 
 #////////////////////////////////////////////////////////////////////////
-
-#Retrieve path of files from the arguments passed to the script
-pathToCSVFile = str(sys.argv[2])            #CSV  input file 
-pathToGEOFile = str(sys.argv[3])            #GEO output file
 
 # Field names for the different attributes of the points given on the
 #  CSV inputFile

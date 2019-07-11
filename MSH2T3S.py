@@ -9,12 +9,12 @@
 # 
 # Date:       July 8, 2019
 #
-# Modified:   July 8, 2019
+# Modified:   July 10, 2019
 #
 # Works on:   python3
 #
-# Purpose:    Script takes in a MSH file generated on gmsh and produces 
-#             a t3s mesh file (MSH) recognized by BlueKenue(C)
+# Purpose:    Script takes in a MSH (v.2) file generated on gmsh and produces 
+#             a t3s mesh file (MSH) recognized by BlueKenue(C). 
 #
 # Needs:      Python3, csv, sys, os, shutil
 #
@@ -29,31 +29,47 @@
 #
 # Bibliography & Useful links:
 # -- https://github.com/pprodano/pputils
+# -- http://gmsh.info/doc/texinfo/gmsh.html#MSH-file-format-version-2-_0028Legacy_0029
 #
 #////////////////////////////////////////////////////////////////////////
 
 import csv, sys, os, re
 
-##INPUT File
-pathToMSHFile = str(sys.argv[1])
+#Retrieve path of files from the arguments passed to the script
+pathToMSHFile = str(sys.argv[1])            #MSH  input file 
+pathToT3SFile = str(sys.argv[2])            #T3S output file
 
-##OUTPUT File
-pathToT3SFile = str(sys.argv[2])
+#////////////////////////////////////////////////////////////////////////
+#                         def Functions                                 #
+#////////////////////////////////////////////////////////////////////////
 
+###   Reads a MSH file without parsing by columns
 def readFile(pathToFile):
     try: 
         X = (open(pathToFile,"r"))
         return(X)
     except FileNotFoundError:
-        print("CSV file could not be found")
+        print("MSH file could not be found")
+
+###   Finds the line number where a string is found (needle), similarly 
+###     to the .sh program "grep"
 def getLineIndex(haystack,needle):
     try:
         return(haystack.index(needle))
     except ValueError:
         print("Pattern could not be found")
+
+###   Takes a text file and splits it as a list of strings. Each line
+###     on the file is an element of the list
 def parseFile(varFile):
-    X = str(varFile.read())
-    return(X.split("\n"))
+    try: 
+         X = str(varFile.read())
+        return(X.split("\n"))
+    except FileNotFoundError:
+        print("MSH for parsing file could not be found")
+
+###   Returns the i-th element of each element from a list of strings
+###     e.g. ["A B C","1 2 3"] >> [B,2]
 def getColumnContents(haystack,colIndex,separator = " "):
     colIndex -= 1 #index start at 0
     column = []
@@ -61,12 +77,16 @@ def getColumnContents(haystack,colIndex,separator = " "):
         X = line.split()
         column.append(X[colIndex])
     return column
+
+###   Builds a list of three columns separated by a space in T3S format
 def buildT3S_3Col(Col1,Col2,Col3):
     T3S = []
     for i in range(len(Col1)):
         line = str(Col1[i]) + " " + str(Col2[i]) + " " + str(Col3[i])
         T3S.append(line)
     return(T3S)
+
+###   Appends a list to a file
 def appendFile(what, whereToFile = pathToT3SFile,isString = False):
     if not isString :
         with open(whereToFile,"a") as outFile:
@@ -78,10 +98,17 @@ def appendFile(what, whereToFile = pathToT3SFile,isString = False):
             outFile.write(str(what))
             outFile.close()
 
+###   Resets and creates a new file
 def resetT3SFile(nameFile):
-    with open(nameFile,"w") as outFile:
-        outFile.write('')
-        outFile.close()
+    try: 
+        with open(nameFile,"w") as outFile:
+            outFile.write('')
+            outFile.close()
+    except FileNotFoundError:
+        print("T3S file could not be found when reseting")
+
+###   From a .msh mesh, extracts a list of the elements corresponding to
+###     just a dimension. By default it extracts TRIANGLES
 def filterMSHElement(listElements,dimension = 2):
     X = getColumnContents(listElements,2)
     filteredElements = []
@@ -89,6 +116,8 @@ def filterMSHElement(listElements,dimension = 2):
         if int(X[i]) == dimension :
             filteredElements.append(listElements[i])
     return filteredElements
+
+###   Generates the Header for the T3S file
 def buildT3S_Header(nNodes,nElements):
     header = "#########################################################################\
         \n:FileType t3s  ASCII  EnSim 1.0\
@@ -113,19 +142,21 @@ def buildT3S_Header(nNodes,nElements):
         \n:EndHeader\n"
     return(header)
 
-#Touch T3S File
+#////////////////////////////////////////////////////////////////////////
+
+#Create a new empty T3S File
 resetT3SFile(pathToT3SFile)
 
-#Get MSH File into python
+#Read MSH file and organize it as a list
 MSHFile = readFile(pathToMSHFile)
 Raw_MSH = parseFile(MSHFile)
 
-#Extract Nodes
-startNodes = getLineIndex(Raw_MSH,"$Nodes")
-endNodes   = getLineIndex(Raw_MSH,"$EndNodes")
+#Extract Nodes from the MSH File
+startNodes = getLineIndex(Raw_MSH,"$Nodes")      
+endNodes   = getLineIndex(Raw_MSH,"$EndNodes")   
 Nodes_MSH  = Raw_MSH[startNodes+2:endNodes]
 
-#Extract Coordinates of Nodes
+#Extract Coordinates of the extracted list of nodes
 manyNodes  = int(Raw_MSH[startNodes+1])
 xCoord_MSH = getColumnContents(Nodes_MSH,2)
 yCoord_MSH = getColumnContents(Nodes_MSH,3)
@@ -133,15 +164,15 @@ yCoord_MSH = getColumnContents(Nodes_MSH,3)
 #Build T3S Node List
 Nodes_T3S  = buildT3S_3Col(xCoord_MSH,yCoord_MSH,xCoord_MSH)
 
-#Extract Nodes
+#Extract Elements from the MSH File
 startElements = getLineIndex(Raw_MSH,"$Elements")
 endElements   = getLineIndex(Raw_MSH,"$EndElements")
 Elements_MSH  = Raw_MSH[startElements+2:endElements]
 
-#Extract 2d Triangles MSH elements
+#Extract only 2d Triangles from the MSH elements
 Triangles_MSH = filterMSHElement(Elements_MSH,2)
 
-#Extract Structure of Elements
+#Extract only the structure of elements from the list
 manyElements   = int(len(Triangles_MSH))
 p1Elements_MSH = getColumnContents(Triangles_MSH,6)
 p2Elements_MSH = getColumnContents(Triangles_MSH,7)
@@ -153,9 +184,9 @@ Elements_T3S  = buildT3S_3Col(p1Elements_MSH,p2Elements_MSH,p3Elements_MSH)
 #Build T3S Header
 Header_T3S  = buildT3S_Header(manyNodes,manyElements)
 
-#Write Files
-appendFile(Header_T3S,pathToT3SFile,True)
-appendFile(Nodes_T3S,pathToT3SFile)
-appendFile(Elements_T3S,pathToT3SFile)
+#Write T3S Files
+appendFile(Header_T3S,pathToT3SFile,True)       #Header
+appendFile(Nodes_T3S,pathToT3SFile)             #Nodes
+appendFile(Elements_T3S,pathToT3SFile)          #Triangles
 
-print("")
+print("MSH2T3S ~OK~")
