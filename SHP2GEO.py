@@ -270,7 +270,6 @@ resetFolder("../SHP_Files/.Temp")
 #### i | heteropolygon   : SHP polygon + SHP polygon
 #### l | lines           : SHP lines
 #### v | vertices        : SHP points
-
 execMode = str(sys.argv[1]).lower()
 
 if   execMode in ["p","polygon"]:
@@ -329,3 +328,5 @@ else:
 
 #Delete temporal folder
 shutil.rmtree("../SHP_Files/.Temp", ignore_errors=True)
+
+print("SHP2GEO job ~OK~")

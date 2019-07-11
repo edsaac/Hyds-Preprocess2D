@@ -9,7 +9,7 @@
 # 
 # Date:       July 8, 2019
 #
-# Modified:   July 8, 2019
+# Modified:   July 10, 2019
 #
 # Works on:   python3
 #
@@ -59,14 +59,14 @@
 
 import csv, sys, os, shutil
 
-##INPUT File
-pathToCSVFile = str(sys.argv[2])
+#////////////////////////////////////////////////////////////////////////
+#                         def Functions                                 #
+#////////////////////////////////////////////////////////////////////////
 
-##OUTPUT File
-pathToGEOFile = str(sys.argv[3])
-
+###   Reads a CSV file and returns a whole row, a whole column or a
+###     single item
 def getCommaFile(fileName, row = -1, col= -1):
-    #Read csv file
+    #Reads the CSV file from the given path
     while True:
         try: 
             rawPointFile = open(fileName)
@@ -75,14 +75,14 @@ def getCommaFile(fileName, row = -1, col= -1):
         except FileNotFoundError:
             print("CSV file could not be found")
 
-    #Return a single row
+    #Returns a single row of the CSV file
     while row != -1 and col == -1:
         try:
             return rawPointFile[row]
         except IndexError:
             print("Row could not be found")
 
-    #Return a single column
+    #Return a single column of the CSV file
     while row == -1 and col != -1:
         try:
             colFile=[]
@@ -92,27 +92,37 @@ def getCommaFile(fileName, row = -1, col= -1):
         except IndexError:
             print("Column could not be found")
 
-    #Return a single value
+    #Return a single value of the CSV file
     while row != -1 and col != -1:
         try:
             return rawPointFile[row][col]
         except IndexError:
             print("Item could not be found")
-def getColumn(xID):
+
+###   From the CSV headers identifies the position of certain attribute
+def getColumn(xID,fileName = pathToCSVFile):
     try:
-        header = getCommaFile(pathToCSVFile,row=0)
+        header = getCommaFile(fileName,row=0)
         return(header.index(xID))
     except ValueError:
         print(str(xID) + " column could not be found")
+
+###   Starts a new GEO file with initialization of indeces of the GEO 
+###     features 
 def resetFile(nameFile):
     with open(nameFile,"w") as outFile:
         outFile.write('P=1;\nL=1;\nLL=1;\nPS=0;\n\n')
         outFile.close()
+
+###   Appends to a GEO file a list of features 
 def appendFile(appendy, nameFile = pathToGEOFile):
     with open(nameFile,"a") as outFile:
         for i in range(len(appendy)):
             outFile.write(str(appendy[i]))
         outFile.close()
+
+###   Builds the "Point()" GEO features from a list of X-coordinates, 
+###     Y-coordinates, Z-coordinates, indices and element sizes  
 def buildGEOPoints(X,Y,Z=[],I=[],R=[]):
     ligne=['']
     for item in range(len(X)):
@@ -127,8 +137,10 @@ def buildGEOPoints(X,Y,Z=[],I=[],R=[]):
              "," + str(z1) +\
              "," + str(r1) + "};" + '\n'
                  )
-    #ligne.append("\n" + "P=" + str(len(X)) + ";\n")
     return ligne
+
+###   Builds the "Line()" GEO features from a list of Start-Points,
+###     End-Points and indices
 def buildGEOLines(I,L1,L2):
     ligne=['']
     for item in range(len(I)):
@@ -139,8 +151,10 @@ def buildGEOLines(I,L1,L2):
                     + str(l1) +\
              ", P+" + str(l2) + "};" + '\n'
                  )
-    #ligne.append("\n" + "L=" + str(len(I)) + ";\n")
     return ligne
+
+###   Add a line to the GEO file setting the new start value for the
+###     GEO indices of certain feature
 def addLastIndex(parameter, quantity = 0, recursive = False):
     if recursive == False:
         indicator = str(parameter) + " = " + str(quantity) + ";\n" 
@@ -149,6 +163,10 @@ def addLastIndex(parameter, quantity = 0, recursive = False):
         indicator = str(parameter) + " = " + str(parameter) + " + " + str(quantity) + ";\n" 
         appendFile(indicator)
     return
+
+###   From a list of data, extracts a list of features without repetitions
+###     e.g., [0,1,1,2,2,3] >> [0,1,2,3]
+###     It works as set() but keeps the order of the elements on the original list
 def setColumn(column):
     result = []
     k = 0
@@ -158,52 +176,65 @@ def setColumn(column):
             k+=1
     return result
 
-###############################################
-xColumnID = "X_m"
-yColumnID = "Y_m"
-iColumnID = "vertex_ind"
-holeColID = "vertex_par"
-paragraphSeparator = ['\n',"/**********************************/",'\n\n']
-###############################################
+#////////////////////////////////////////////////////////////////////////
 
+#Retrieve path of files from the arguments passed to the script
+pathToCSVFile = str(sys.argv[2])            #CSV  input file 
+pathToGEOFile = str(sys.argv[3])            #GEO output file
+
+# Field names for the different attributes of the points given on the
+#  CSV inputFile
+xColumnID = "X_m"                       # X-Coordinate
+yColumnID = "Y_m"                       # Y-Coordinate
+iColumnID = "vertex_ind"                # Point Identification
+holeColID = "vertex_par"                # Ring Identification
+paragraphSeparator = ['\n',"/**********************************/",'\n\n']
+
+### Retrieves GEO builder mode
+#### b | polygon         : computational domain boundary
+#### p | points          : fixed points on the computational domain
+#### l | lines           : breaklines on the computational domain
 execMode = str(sys.argv[1]).lower()
 
-#Extract X coordinates
+#Extract X-coordinates as a list
 xCoord = getCommaFile(pathToCSVFile,col=getColumn(xColumnID))
 xCoord.remove(xColumnID)
 
-#Extract Y coordinates
+#Extract Y-coordinates as a list
 yCoord = getCommaFile(pathToCSVFile,col=getColumn(yColumnID))
 yCoord.remove(yColumnID)
 
-#Extract Z coordinates #modificar?
+#Extract Z-coordinates as a list [ Just a list of zeros ]
 zCoord = list(range(len(xCoord)))
 for i in range(len(zCoord)):
     zCoord[i] = float(zCoord[i])*0
 zCoord = list(zCoord)
 
-#Extract Index
+#Extract identification of points as a list
 iCoord = getCommaFile(pathToCSVFile,col=getColumn(iColumnID))
 iCoord.remove(iColumnID)
 
-########### EXECUTION CASES ###########
-# Boundary Mode 
+#////////////////////////////////////////////////////////////////////////
 
 if execMode in ["b", "boundary"]:
-    rColumnID = "Rx_m"
-    #Extract Refinement values
+    #This mode OVERWRITES a list of points as boundaries of a computational
+    #   domain. The other execMode's APPEND to the GEO file.
+
+    rColumnID = "Rx_m"    #if the boundary was obtained as SHP2GEO h mode
+                          #  change to "R_m" if the b mode was used 
+
+    #Extract element size values as a list
     rCoord = getCommaFile(pathToCSVFile,col=getColumn(rColumnID))
     rCoord.remove(rColumnID)
 
-    #Extract hole flager
+    #Extract hole indentifications as a list
     holeCol = getCommaFile(pathToCSVFile,col=getColumn(holeColID))
     holeCol.remove(holeColID)
-    print(str(holeCol))
-
-    #Initialize file
+    
+    #Initialize GEO file. In this mode the GEO file is written from scratch
     resetFile(pathToGEOFile)
     
-    #Get topology
+    #Identify rings on the computational domain
     holeListID = list(set(holeCol))
     holeListID.sort()
     
@@ -212,10 +243,9 @@ if execMode in ["b", "boundary"]:
         holeIndex.append(holeCol.index(hole))
     holeIndex.append(len(holeCol))
 
-    print(str(holeIndex))
-    print(str(holeListID))
-    
+    #Build an independent polygon for each ring found on the topology 
     for hole in range(len(holeListID)) :
+        # Construction of "Point()" GEO-features 
         start = holeIndex[hole]
         end   = holeIndex[hole+1]-1
         GEO_Points = buildGEOPoints( \
@@ -227,15 +257,14 @@ if execMode in ["b", "boundary"]:
                 )
         appendFile(GEO_Points)
         
-        #Convert to GEO Lines
+        # Construction of "Line()" GEO-features 
         LINES1 = list(iCoord[start:end])
         LINES2 = list((iCoord[start+1:end]))+[iCoord[start]]
         INDEXLINES = list(range(start,end))
-
         GEO_Lines = buildGEOLines(INDEXLINES,LINES1,LINES2)
         appendFile(GEO_Lines)
 
-        #Generate GEO Line Loop
+        # Construction of "Line Loop()" GEO-features 
         GEO_Loops = ["Line Loop (LL+" + \
             str(hole) + ") = {L+" + \
             str(min(INDEXLINES)) + " ... L+" +  \
@@ -244,15 +273,15 @@ if execMode in ["b", "boundary"]:
         appendFile(GEO_Loops)
         appendFile(paragraphSeparator)
 
-    #Generate GEO Plane Surface
-    appendFile(paragraphSeparator)
+    # Construction of "Plane Surface()" GEO-feature. Only one is required to 
+    #   define the whole computational domain. 
     GEO_Surface = ["Plane Surface (PS+1) = {LL+" + \
         str(min(iCoord)) + " ... " + "LL+" + \
         str(len(holeListID)-1) + "};\n"\
             ]
     appendFile(GEO_Surface)
     
-    #Update index starts
+    # Update indeces starting point
     appendFile(paragraphSeparator)
     addLastIndex("P",str(len(xCoord)),True)
     addLastIndex("L",str(max(INDEXLINES)),True)
@@ -261,54 +290,62 @@ if execMode in ["b", "boundary"]:
     addLastIndex("PS",str(len(GEO_Surface)),True)
     appendFile(paragraphSeparator)
 
+    print("Computational Domain ~OK~")
+
 elif execMode in ["p", "pointsinsurface"]:
-    rColumnID = "R_m"
-    #Extract Refinement values
+    #This mode APPENDS a list of points as hard points into a previously
+    #   generated boundary from the buildGEO.py "b" mode.
+    
+    rColumnID = "R_m"   #if the boundary was obtained as SHP2GEO "v" mode
+                              
+    #Extract element size values as a list
     rCoord = getCommaFile(pathToCSVFile,col=getColumn(rColumnID))
     rCoord.remove(rColumnID)
     
-    #Convert to GEO Points   
+    # Construction of "Point()" GEO-features
     GEO_Points = buildGEOPoints(xCoord,yCoord,zCoord,iCoord,rCoord)
     appendFile(GEO_Points)
 
-    #Add as points in Surface
-    appendFile(paragraphSeparator)
+    # Construction of "Point in Surface" GEO-features
     GEO_PointsInSurface = ["Point {P+1 ... P+" + str(max(iCoord)) +\
         "} In Surface { 1 } ;\n"]
     appendFile(GEO_PointsInSurface)
     
-    #Update index starts
+    # Update indeces starting point
     appendFile(paragraphSeparator)
     addLastIndex("P",str(len(GEO_Points)),True)
     appendFile(paragraphSeparator)
 
 elif execMode in ["l", "linesinsurface"]:
     
-    lineColID = "DN"
-    rColumnID = "R_m"
-    #Extract Refinement values
+    #This mode APPENDS a list of points as hard points into a previously
+    #   generated boundary from the buildGEO.py "b" mode.
+    
+    lineColID = "DN"               #Should be inputed by the user but meh
+    rColumnID = "R_m"              #if the boundary was obtained as SHP2GEO l mode
+ 
+    #Extract element size values as a list
     rCoord = getCommaFile(pathToCSVFile,col=getColumn(rColumnID))
     rCoord.remove(rColumnID)
 
-    #Extract line identifier
+    #Extract different line identifiers values as a list
     lineCol = getCommaFile(pathToCSVFile,col=getColumn(lineColID))
     lineCol.remove(lineColID)
-    print(str(lineCol))
-
-    #Get topology
-    lineListID = setColumn(lineCol)
     
+    #Get a list of unique line identifiers and the lines in the CSV file
+    #   where they start and end
+    lineListID = setColumn(lineCol)
     lineIndex = []
     for line in lineListID :
         lineIndex.append(lineCol.index(line))
     lineIndex.append(len(lineCol))
-
-    print(str(lineIndex))
-    print(str(lineListID))
     
+    #Build an independent line for each line found on the CSV file
     for line in range(len(lineListID)) :
+        
+        # Construction of "Point()" GEO-features
         start = lineIndex[line]
-        end   = lineIndex[line+1] #Inclusive range []
+        end   = lineIndex[line+1] 
         GEO_Points = buildGEOPoints( \
             xCoord[start:end],\
             yCoord[start:end],\
@@ -318,23 +355,22 @@ elif execMode in ["l", "linesinsurface"]:
                 )
         appendFile(GEO_Points)
         
-        #Convert to GEO Lines
-
+        # Construction of "Point()" GEO-features
         LINES1 = list(iCoord[start:end-1])
         LINES2 = list(iCoord[start+1:end])
         INDEXLINES = list(iCoord[start:end-1])
-
         GEO_Lines = buildGEOLines(INDEXLINES,LINES1,LINES2)
         appendFile(GEO_Lines)
 
-        #Add as Lines in Surface
-        appendFile(paragraphSeparator)
-        GEO_LinesInSurface = ["Line {L+" + str(INDEXLINES[0]) + \
-            " ... L+" + str(INDEXLINES[-1]) +\
+        # Construction of "Line in Surface" GEO-features
+        GEO_LinesInSurface = ["Line {L+" + \
+            str(INDEXLINES[0]) + \
+            " ... L+" + \
+            str(INDEXLINES[-1]) +\
             "} In Surface { 1 } ;\n"]
         appendFile(GEO_LinesInSurface)
     
-        #Update index starts
+        # Update indeces starting point
         appendFile(paragraphSeparator)
         addLastIndex("P",str(INDEXLINES[-1]),True)
         addLastIndex("P",str(2),True)
@@ -343,3 +379,4 @@ elif execMode in ["l", "linesinsurface"]:
         appendFile(paragraphSeparator)
     
 appendFile("//END OF BLOCK//\n\n\n")
+print("buildGEO Job ~OK~")
