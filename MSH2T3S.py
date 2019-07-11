@@ -63,7 +63,7 @@ def getLineIndex(haystack,needle):
 ###     on the file is an element of the list
 def parseFile(varFile):
     try: 
-         X = str(varFile.read())
+        X = str(varFile.read())
         return(X.split("\n"))
     except FileNotFoundError:
         print("MSH for parsing file could not be found")
@@ -189,4 +189,4 @@ appendFile(Header_T3S,pathToT3SFile,True)       #Header
 appendFile(Nodes_T3S,pathToT3SFile)             #Nodes
 appendFile(Elements_T3S,pathToT3SFile)          #Triangles
 
-print("MSH2T3S ~OK~")
+print("MSH2T3S ~OK~: " + str(sys.argv[1]) + " > " + str(sys.argv[2]))

@@ -285,6 +285,7 @@ if   execMode in ["p","polygon"]:
     polyToLine(path2Polygon,path2Line)              #SHP Polygon   >> SHP Lines
     lineToVertex(path2Line,path2Vertex)             #SHP Lines     >> SHP Vertices
     vertexToXYCSV(path2Vertex,path2VertexXY)        #SHP Vertices  >> CVS XY Vertices
+    print("SHP2GEO polygon ~OK~:  " + str(sys.argv[2]) + " > " + str(sys.argv[3]))
 
 elif execMode in ["i","heteropolygon"]:
     path2Polygon = str(sys.argv[2])                        #Outline Polygon SHP << INPUT
@@ -303,6 +304,8 @@ elif execMode in ["i","heteropolygon"]:
     lineToVertex(path2Line,path2Vertex)                    #SHP Lines     >> SHP Vertices
     mapElementSizes(path2Vertex,path2SizeMap,path2UnionV)  #SHP Vertices  >> SHP Mapped Vertices
     vertexToXYCSV(path2UnionV,path2VertexXY)               #SHP Mapped V  >> CVS XY Vertices
+    print("SHP2GEO iPolygon ~OK~:  " + str(sys.argv[2]) + \
+        " + " + str(sys.argv[3]) + "> " + str(sys.argv[4]))
 
 elif execMode in ["l","line"]:
     path2Line = str(sys.argv[2])                           #Outline Line SHP path
@@ -314,6 +317,7 @@ elif execMode in ["l","line"]:
 
     lineToVertex(path2Line,path2Vertex)             #SHP Lines     >> SHP Vertices
     vertexToXYCSV(path2Vertex,path2VertexXY)        #SHP Vertices  >> CVS XY Vertices
+    print("SHP2GEO Lines ~OK~:  " + str(sys.argv[2]) + " > " + str(sys.argv[3]))
 
 elif execMode in ["v","vertices"]:
     path2Vertex = str(sys.argv[2])                         #Outline Vertices SHP path
@@ -321,7 +325,8 @@ elif execMode in ["v","vertices"]:
 
     touchFile(path2VertexXY)
 
-    vertexToXYCSV(path2Vertex,path2VertexXY)        #SHP Vertices  >> CVS XY Vertices 
+    vertexToXYCSV(path2Vertex,path2VertexXY)        #SHP Vertices  >> CVS XY Vertices
+    print("SHP2GEO Vertices ~OK~:  " + str(sys.argv[2]) + " > " + str(sys.argv[3])) 
 
 else:
     print("Unrecognized parameter:  " + str(sys.argv[1]))
@@ -329,4 +334,3 @@ else:
 #Delete temporal folder
 shutil.rmtree("../SHP_Files/.Temp", ignore_errors=True)
 
-print("SHP2GEO job ~OK~")

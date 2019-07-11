@@ -71,23 +71,27 @@ pathToGEOFile = str(sys.argv[3])            #GEO output file
 ###     single item
 def getCommaFile(fileName, row = -1, col= -1):
     #Reads the CSV file from the given path
-    while True:
-        try: 
-            rawPointFile = open(fileName)
-            rawPointFile = list(csv.reader(rawPointFile))
-            break
-        except FileNotFoundError:
-            print("CSV file could not be found")
+    try: 
+        rawPointFile = open(fileName)
+        rawPointFile = list(csv.reader(rawPointFile))
+    except FileNotFoundError:
+        print("CSV file could not be found")
 
+    #Checks non-empty file
+    if len(rawPointFile) < 1 :
+        print(str(fileName) + " is empty :S \n")
+        sys.exit("Bye!")
+    
     #Returns a single row of the CSV file
-    while row != -1 and col == -1:
+    if row != -1 and col == -1:
+        
         try:
             return rawPointFile[row]
         except IndexError:
             print("Row could not be found")
 
     #Return a single column of the CSV file
-    while row == -1 and col != -1:
+    elif row == -1 and col != -1:
         try:
             colFile=[]
             for row in range(len(rawPointFile)):
@@ -97,16 +101,18 @@ def getCommaFile(fileName, row = -1, col= -1):
             print("Column could not be found")
 
     #Return a single value of the CSV file
-    while row != -1 and col != -1:
+    elif row != -1 and col != -1:
         try:
             return rawPointFile[row][col]
         except IndexError:
             print("Item could not be found")
+    else:
+        print("dafuq")
 
 ###   From the CSV headers identifies the position of certain attribute
 def getColumn(xID,fileName = pathToCSVFile):
     try:
-        header = getCommaFile(fileName,row=0)
+        header = getCommaFile(fileName, row = 0)
         return(header.index(xID))
     except ValueError:
         print(str(xID) + " column could not be found")
@@ -210,10 +216,6 @@ for i in range(len(zCoord)):
     zCoord[i] = float(zCoord[i])*0
 zCoord = list(zCoord)
 
-#Extract identification of points as a list
-iCoord = getCommaFile(pathToCSVFile,col=getColumn(iColumnID))
-iCoord.remove(iColumnID)
-
 #////////////////////////////////////////////////////////////////////////
 
 if execMode in ["b", "boundary"]:
@@ -222,7 +224,11 @@ if execMode in ["b", "boundary"]:
 
     rColumnID = "Rx_m"    #if the boundary was obtained as SHP2GEO h mode
                           #  change to "R_m" if the b mode was used 
-
+    
+    #Extract identification of points as a list
+    iCoord = getCommaFile(pathToCSVFile,col=getColumn(iColumnID))
+    iCoord.remove(iColumnID)
+    
     #Extract element size values as a list
     rCoord = getCommaFile(pathToCSVFile,col=getColumn(rColumnID))
     rCoord.remove(rColumnID)
@@ -290,7 +296,7 @@ if execMode in ["b", "boundary"]:
     addLastIndex("PS",str(len(GEO_Surface)),True)
     appendFile(paragraphSeparator)
 
-    print("Computational Domain ~OK~")
+    print("Computational Domain ~OK~: " + str(sys.argv[2]) + " > " + str(sys.argv[3]))
 
 elif execMode in ["p", "pointsinsurface"]:
     #This mode APPENDS a list of points as hard points into a previously
@@ -302,6 +308,9 @@ elif execMode in ["p", "pointsinsurface"]:
     rCoord = getCommaFile(pathToCSVFile,col=getColumn(rColumnID))
     rCoord.remove(rColumnID)
     
+    #Overwrite point indices
+    iCoord = list(range(len(xCoord)))
+
     # Construction of "Point()" GEO-features
     GEO_Points = buildGEOPoints(xCoord,yCoord,zCoord,iCoord,rCoord)
     appendFile(GEO_Points)
@@ -315,6 +324,7 @@ elif execMode in ["p", "pointsinsurface"]:
     appendFile(paragraphSeparator)
     addLastIndex("P",str(len(GEO_Points)),True)
     appendFile(paragraphSeparator)
+    print("Hardpoints ~OK~: " + str(sys.argv[2]) + " > " + str(sys.argv[3]))
 
 elif execMode in ["l", "linesinsurface"]:
     
@@ -327,6 +337,10 @@ elif execMode in ["l", "linesinsurface"]:
     #Extract element size values as a list
     rCoord = getCommaFile(pathToCSVFile,col=getColumn(rColumnID))
     rCoord.remove(rColumnID)
+
+    #Extract identification of points as a list
+    iCoord = getCommaFile(pathToCSVFile,col=getColumn(iColumnID))
+    iCoord.remove(iColumnID)
 
     #Extract different line identifiers values as a list
     lineCol = getCommaFile(pathToCSVFile,col=getColumn(lineColID))
@@ -378,5 +392,6 @@ elif execMode in ["l", "linesinsurface"]:
         addLastIndex("L",str(1),True)
         appendFile(paragraphSeparator)
     
+    print("Hardlines ~OK~: " + str(sys.argv[2]) + " > " + str(sys.argv[3]))
+    
 appendFile("//END OF BLOCK//\n\n\n")
-print("buildGEO Job ~OK~")
