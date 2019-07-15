@@ -25,7 +25,7 @@ def buildGEOPoints(X,Y,Z=[],I=[],R=[]):
                  + str(x1) +\
              "," + str(y1) +\
              "," + str(z1) +\
-             "," + str(r1) + "};" + '\n'
+             "," + str(r1) + "};"
                  )
     return ligne
 
@@ -39,7 +39,7 @@ def buildGEOLines(I,L1,L2):
         l2 = int(L2[item])
         ligne.append("Line(L+" + str(i1) + ") = {P+" \
                     + str(l1) +\
-             ", P+" + str(l2) + "};" + '\n'
+             ", P+" + str(l2) + "};"
                  )
     return ligne
 

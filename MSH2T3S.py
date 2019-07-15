@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #
 #////////////////////////////////////////////////////////////////////////
 #                                                                       #
@@ -95,8 +96,7 @@ pathToT3SFile = str(sys.argv[2])            #T3S output file
 fily.resetFile(pathToT3SFile,"T3S")
 
 #Read MSH file and organize it as a list
-MSHFile = fily.readFile(pathToMSHFile)
-Raw_MSH = fily.parseFile(MSHFile)
+Raw_MSH = fily.parseFile(pathToMSHFile)
 
 #Extract Nodes from the MSH File
 startNodes = gets.getLineIndex(Raw_MSH,"$Nodes")      
@@ -140,8 +140,8 @@ Elements_T3S  = build.buildT3S_3Col(p1Elements_MSH,p2Elements_MSH,p3Elements_MSH
 Header_T3S  = build.buildT3S_Header(manyNodes,manyElements)
 
 #Write T3S Files
-fily.appendFileT3S(Header_T3S,pathToT3SFile,True)       #Header
-fily.appendFileT3S(Nodes_T3S,pathToT3SFile)             #Nodes
-fily.appendFileT3S(Elements_T3S,pathToT3SFile)          #Triangles
+fily.appendFile(Header_T3S,pathToT3SFile,True)       #Header
+fily.appendFile(Nodes_T3S,pathToT3SFile)             #Nodes
+fily.appendFile(Elements_T3S,pathToT3SFile)          #Triangles
 
 print("MSH2T3S ~OK~: " + str(sys.argv[1]) + " > " + str(sys.argv[2]))

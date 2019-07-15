@@ -35,20 +35,20 @@ def resetFile(nameFile,extension):
         print("File could not be found when reseting")
 
 ###   Reads a file without parsing by columns
-def readFile(pathToFile):
+#def readFile(pathToFile):
     # try: 
     #     X = (open(pathToFile,"r"))
     #     return(X)
     # except FileNotFoundError:
     #     print("in f.readFile\n " + str(pathToFile) + " could not be found\n")
-    try: 
-        with open(pathToFile,"r") as X:
-            return(X)
-    except FileNotFoundError:
-        print("in f.readFile\n " + str(pathToFile) + " could not be found\n")
+    # try: 
+    #     with open(pathToFile,"r") as X:
+    #         return(X)
+    # except FileNotFoundError:
+    #     print("in f.readFile\n " + str(pathToFile) + " could not be found\n")
 
 ###   Appends a list to a file
-def appendFileT3S(what, whereToFile, isString = False):
+def appendFile(what, whereToFile, isString = False):
     if not isString :
         with open(whereToFile,"a") as outFile:
             for i in range(len(what)):
@@ -59,18 +59,12 @@ def appendFileT3S(what, whereToFile, isString = False):
             outFile.write(str(what))
             outFile.close()
 
-###   Appends to a GEO file a list of features 
-def appendFile(appendy, nameFile):
-    with open(nameFile,"a") as outFile:
-        for i in range(len(appendy)):
-            outFile.write(str(appendy[i]))
-        outFile.close()
-
 ###   Takes a text file and splits it as a list of strings. Each line
 ###     on the file is an element of the list
-def parseFile(varFile):
+def parseFile(pathToFile):
     try: 
-        X = str(varFile.read())
+        with open(pathToFile,"r") as varFile:
+            X = str(varFile.read())
         return(X.split("\n"))
     except FileNotFoundError:
-        print("MSH for parsing file could not be found")
+        print("in f.parseFile\n " + str(pathToFile) + " could not be found\n")

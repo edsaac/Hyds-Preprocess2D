@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #
 #////////////////////////////////////////////////////////////////////////
 #                                                                       #
@@ -73,7 +74,7 @@ xColumnID = "X_m"                       # X-Coordinate
 yColumnID = "Y_m"                       # Y-Coordinate
 iColumnID = "vertex_ind"                # Point Identification
 holeColID = "vertex_par"                # Ring Identification
-paragraphSeparator = ['\n',"/**********************************/",'\n\n']
+paragraphSeparator = ["\n","/**********************************/"]
 
 ### Retrieves GEO builder mode
 #### b | polygon         : computational domain boundary
@@ -94,7 +95,7 @@ zCoord = ["0.00"] * (len(xCoord))
 
 #////////////////////////////////////////////////////////////////////////
 
-if execMode in ["b", "boundary"]:
+if execMode in ["-b", "--boundary"]:
     #This mode OVERWRITES a list of points as boundaries of a computational
     #   domain. The other execMode's APPEND to the GEO file.
 
@@ -137,23 +138,23 @@ if execMode in ["b", "boundary"]:
             iCoord[start:end],\
             rCoord[start:end]\
                 )
-        fily.appendFileT3S(GEO_Points,pathToGEOFile)
+        fily.appendFile(GEO_Points,pathToGEOFile)
         
         # Construction of "Line()" GEO-features 
         LINES1 = list(iCoord[start:end])
         LINES2 = list((iCoord[start+1:end]))+[iCoord[start]]
         INDEXLINES = list(range(start,end))
         GEO_Lines = build.buildGEOLines(INDEXLINES,LINES1,LINES2)
-        fily.appendFileT3S(GEO_Lines,pathToGEOFile)
+        fily.appendFile(GEO_Lines,pathToGEOFile)
 
         # Construction of "Line Loop()" GEO-features 
-        GEO_Loops = ["Line Loop (LL+" + \
+        GEO_Loops = ["\nLine Loop (LL+" + \
             str(hole) + ") = {L+" + \
             str(min(INDEXLINES)) + " ... L+" +  \
-            str(max(INDEXLINES)) + "};\n"\
+            str(max(INDEXLINES)) + "};"\
                 ]
-        fily.appendFileT3S(GEO_Loops,pathToGEOFile)
-        fily.appendFileT3S(paragraphSeparator,pathToGEOFile)
+        fily.appendFile(GEO_Loops,pathToGEOFile)
+        fily.appendFile(paragraphSeparator,pathToGEOFile)
 
     # Construction of "Plane Surface()" GEO-feature. Only one is required to 
     #   define the whole computational domain. 
@@ -161,20 +162,20 @@ if execMode in ["b", "boundary"]:
         str(min(iCoord)) + " ... " + "LL+" + \
         str(len(holeListID)-1) + "};\n"\
             ]
-    fily.appendFileT3S(GEO_Surface,pathToGEOFile)
+    fily.appendFile(GEO_Surface,pathToGEOFile)
     
     # Update indeces starting point
-    fily.appendFileT3S(paragraphSeparator,pathToGEOFile)
-    fily.appendFileT3S(build.addLastIndex("P",str(len(xCoord)),True),pathToGEOFile)
-    fily.appendFileT3S(build.addLastIndex("L",str(max(INDEXLINES)),True),pathToGEOFile)
-    fily.appendFileT3S(build.addLastIndex("L",str(1),True),pathToGEOFile)
-    fily.appendFileT3S(build.addLastIndex("LL",str(hole),True),pathToGEOFile)
-    fily.appendFileT3S(build.addLastIndex("PS",str(len(GEO_Surface)),True),pathToGEOFile)
-    fily.appendFileT3S(paragraphSeparator,pathToGEOFile)
+    fily.appendFile(paragraphSeparator,pathToGEOFile)
+    fily.appendFile(build.addLastIndex("P",str(len(xCoord)),True),pathToGEOFile,True)
+    fily.appendFile(build.addLastIndex("L",str(max(INDEXLINES)),True),pathToGEOFile,True)
+    fily.appendFile(build.addLastIndex("L",str(1),True),pathToGEOFile,True)
+    fily.appendFile(build.addLastIndex("LL",str(hole),True),pathToGEOFile,True)
+    fily.appendFile(build.addLastIndex("PS",str(len(GEO_Surface)),True),pathToGEOFile,True)
+    fily.appendFile(paragraphSeparator,pathToGEOFile)
 
     print("Computational Domain ~OK~: " + str(sys.argv[2]) + " > " + str(sys.argv[3]))
 
-elif execMode in ["p", "pointsinsurface"]:
+elif execMode in ["-p", "--pointsinsurface"]:
     #This mode APPENDS a list of points as hard points into a previously
     #   generated boundary from the buildGEO.py "b" mode.
     
@@ -189,20 +190,20 @@ elif execMode in ["p", "pointsinsurface"]:
 
     # Construction of "Point()" GEO-features
     GEO_Points = build.buildGEOPoints(xCoord,yCoord,zCoord,iCoord,rCoord)
-    fily.appendFileT3S(GEO_Points,pathToGEOFile)
+    fily.appendFile(GEO_Points,pathToGEOFile)
 
     # Construction of "Point in Surface" GEO-features
     GEO_PointsInSurface = ["Point {P+1 ... P+" + str(max(iCoord)) +\
         "} In Surface { 1 } ;\n"]
-    fily.appendFileT3S(GEO_PointsInSurface,pathToGEOFile)
+    fily.appendFile(GEO_PointsInSurface,pathToGEOFile)
     
     # Update indeces starting point
-    fily.appendFileT3S(paragraphSeparator,pathToGEOFile)
-    fily.appendFileT3S(build.addLastIndex("P",str(len(GEO_Points)),True),pathToGEOFile)
-    fily.appendFileT3S(paragraphSeparator,pathToGEOFile)
+    fily.appendFile(paragraphSeparator,pathToGEOFile)
+    fily.appendFile(build.addLastIndex("P",str(len(GEO_Points)),True),pathToGEOFile,True)
+    fily.appendFile(paragraphSeparator,pathToGEOFile)
     print("Hardpoints ~OK~: " + str(sys.argv[2]) + " > " + str(sys.argv[3]))
 
-elif execMode in ["l", "linesinsurface"]:
+elif execMode in ["-l", "--linesinsurface"]:
     
     #This mode APPENDS a list of points as hard points into a previously
     #   generated boundary from the buildGEO.py "b" mode.
@@ -243,14 +244,14 @@ elif execMode in ["l", "linesinsurface"]:
             iCoord[start:end],\
             rCoord[start:end]\
                 )
-        fily.appendFileT3S(GEO_Points,pathToGEOFile)
+        fily.appendFile(GEO_Points,pathToGEOFile)
         
         # Construction of "Point()" GEO-features
         LINES1 = list(iCoord[start:end-1])
         LINES2 = list(iCoord[start+1:end])
         INDEXLINES = list(iCoord[start:end-1])
         GEO_Lines = build.buildGEOLines(INDEXLINES,LINES1,LINES2)
-        fily.appendFileT3S(GEO_Lines,pathToGEOFile)
+        fily.appendFile(GEO_Lines,pathToGEOFile)
 
         # Construction of "Line in Surface" GEO-features
         GEO_LinesInSurface = ["Line {L+" + \
@@ -258,15 +259,15 @@ elif execMode in ["l", "linesinsurface"]:
             " ... L+" + \
             str(INDEXLINES[-1]) +\
             "} In Surface { 1 } ;\n"]
-        fily.appendFileT3S(GEO_LinesInSurface,pathToGEOFile)
+        fily.appendFile(GEO_LinesInSurface,pathToGEOFile)
     
         # Update indeces starting point
-        fily.appendFileT3S(paragraphSeparator,pathToGEOFile)
-        fily.appendFileT3S(build.addLastIndex("P",str(INDEXLINES[-1]),True),pathToGEOFile)
-        fily.appendFileT3S(build.addLastIndex("P",str(2),True),pathToGEOFile)
-        fily.appendFileT3S(build.addLastIndex("L",str(INDEXLINES[-1]),True),pathToGEOFile)
-        fily.appendFileT3S(build.addLastIndex("L",str(1),True),pathToGEOFile)
-        fily.appendFileT3S(paragraphSeparator,pathToGEOFile)
+        fily.appendFile(paragraphSeparator,pathToGEOFile)
+        fily.appendFile(build.addLastIndex("P",str(INDEXLINES[-1]),True),pathToGEOFile,True)
+        fily.appendFile(build.addLastIndex("P",str(2),True),pathToGEOFile,True)
+        fily.appendFile(build.addLastIndex("L",str(INDEXLINES[-1]),True),pathToGEOFile,True)
+        fily.appendFile(build.addLastIndex("L",str(1),True),pathToGEOFile,True)
+        fily.appendFile(paragraphSeparator,pathToGEOFile)
     print("Hardlines ~OK~: " + str(sys.argv[2]) + " > " + str(sys.argv[3]))
     
-fily.appendFileT3S("//END OF BLOCK//\n\n\n",pathToGEOFile)
+fily.appendFile("//END OF BLOCK//\n\n\n",pathToGEOFile,True)
