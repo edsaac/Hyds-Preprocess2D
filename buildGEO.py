@@ -61,7 +61,7 @@
 import csv, sys, os, shutil
 
 #import own functions 
-import fily, gis, gets, build
+import fily, gets, build
 
 
 #Retrieve path of files from the arguments passed to the script

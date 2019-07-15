@@ -5,9 +5,9 @@ from fily import touchFile
 #Import Qgis 
 from qgis.core import *
 from qgis.processing import *
-from qgis.utils import *
-from qgis.analysis import *
-from PyQt5.QtCore import QVariant
+#from qgis.utils import *
+#from qgis.analysis import *
+#from PyQt5.QtCore import QVariant
 
 #Add plugins and processing algorithms
 sys.path.append('/usr/share/qgis/python/plugins/')
@@ -59,8 +59,7 @@ def lineToVertex(inputFile,outputFile):
 def vertexToXYCSV(inputFile,outputFile):
     
     #Creates an empty SHP file for scratching the X coordinate
-    path2VertexX = "../SHP_Files/.Temp/3.OutlineVertexX.shp"
-    touchFile(path2VertexX)
+    path2VertexX = "../.Temp/3.OutlineVertexX.shp"
 
     #Load input points SHP layer to environment
     Outline_VertexLayer = QgsVectorLayer(inputFile, "OutlineVertex")
@@ -110,9 +109,9 @@ def mapElementSizes(inputFile,mapFile,outputFile):
     checkLayer(Map_Sizes)
 
     #Create scratch layer for the Union result
-    path2Unioned = "../SHP_Files/.Temp/4.Unioned.shp"
-    touchFile(path2Unioned)
-
+    path2Unioned = "../.Temp/4.Unioned.shp"
+    
+    print("__Something wrong but it works__:")##
     #The R_m attribute for element sizes taken from Map is passed to the 
     #   vertices affected by the mapFile
     params = {
@@ -129,9 +128,8 @@ def mapElementSizes(inputFile,mapFile,outputFile):
 
     #Create another scratch layer for the result of the decision between 
     #   the original element size R_m or the one mapped from mapFile
-    path2Calc = "../SHP_Files/.Temp/5.RMIN.shp"
-    touchFile(path2Calc)
-
+    path2Calc = "../.Temp/5.RMIN.shp"
+   
     #The decision is the minimal value of R_m 
     params = {'INPUT':Unioned_V,
         'FIELD_NAME': "Rx_m",

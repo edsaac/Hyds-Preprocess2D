@@ -6,7 +6,7 @@ def touchFolder(folderName):
     try: 
         os.rmdir(folderName)                          
     except FileNotFoundError:
-        print("Create temporal folder")
+        print("Create temporal folder  " + str(folderName))
     except OSError:
         shutil.rmtree(folderName, ignore_errors=True) 
     os.makedirs(folderName)
