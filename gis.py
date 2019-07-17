@@ -1,18 +1,33 @@
-import sys, os, shutil, re
+import sys, os, shutil, re, subprocess
 from pathlib import Path
 from fily import touchFile
 
 #Import Qgis 
 from qgis.core import *
 from qgis.processing import *
-#from qgis.utils import *
-#from qgis.analysis import *
-#from PyQt5.QtCore import QVariant
+from qgis.utils import *
+from qgis.analysis import *
+from PyQt5.QtCore import QVariant
+
+##  Start QGIS  ##
+QgsApplication.setPrefixPath('/usr', True)
+QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
+qgs = QgsApplication([], True)
+qgs.initQgis()
+
 
 #Add plugins and processing algorithms
 sys.path.append('/usr/share/qgis/python/plugins/')
 import processing
 from processing.core.Processing import Processing
+
+#Add native functions
+Processing.initialize()
+qgs.processingRegistry().addProvider(QgsNativeAlgorithms())
+
+#Start QGIS Project
+project = QgsProject.instance()
+
 
 ############***#
 
@@ -156,3 +171,40 @@ def mapElementSizes(inputFile,mapFile,outputFile):
         'OUTPUT':outputFile
             }
     processing.run("native:orderbyexpression", params )
+
+###   Sample data from raster on points
+def sampleRaster(inputNodes,rasterFile,outputNodes):
+    
+    #Gets absolute path. It is necessary to load CSV into QGIS
+    fullInputpath = str(os.path.abspath(inputNodes))
+
+    #Load and check input points SHP layer to environment
+    csvInputNodes = "file://" + \
+        fullInputpath + \
+        "?crs=epsg:3116&delimiter=%s&xField=%s&yField=%s"\
+        % (",", "Xm", "Ym")
+    meshNodes = QgsVectorLayer(csvInputNodes, "points", "delimitedtext")
+    checkLayer(meshNodes)
+
+    #Calculates the Bottom Elevation
+    params = {'INPUT':meshNodes,
+        'RASTERCOPY': rasterFile,
+        'COLUMN_PREFIX': "B",
+        'OUTPUT':outputNodes
+            }
+    processing.run("qgis:rastersampling", params )
+
+###   Sample data from a polygon SHP on points 
+def rasterPoly(mapFile,outputFile,burnField="FRICTION"):
+    touchFile(outputFile)
+    
+    command = "gdal_rasterize -a " + \
+        str(burnField) + \
+        " -tr 10.0 10.0" + \
+        " -a_nodata -999.0" + \
+        " -ot Float32 -of GTiff " + \
+        str(os.path.abspath(mapFile)) + \
+        " " + \
+        str(os.path.abspath(outputFile))
+   
+    os.system(command)
