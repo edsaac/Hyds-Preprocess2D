@@ -10,7 +10,7 @@
 # 
 # Date:       July 8, 2019
 #
-# Modified:   July 10, 2019
+# Modified:   July 16, 2019
 #
 # Works on:   python3
 #
@@ -32,15 +32,15 @@
 # --> option    : a string that defines which spatial values have to be 
 #                 retrieved from a raster TIFF file 
 #
-#     --> bottom: Only a DEM file is used to define the BOTTOM on the file
+#     --> --bott: Only a DEM file is used to define the BOTTOM on the file
 #
-#     --> energy: Only a raster file containing BOTTOM FRICTION values 
+#     --> --fric: Only a raster file containing BOTTOM FRICTION values 
 #                 is used for the T3S
 #
-#     --> botenr: Both BOTTOM and BOTTOM FRICTION are sampled from two 
+#     --> --both: Both BOTTOM and BOTTOM FRICTION are sampled from two 
 #                 raster files
 #
-#     --> notifs: Sampling node data is not performed and a dummy value is 
+#     --> --none: Sampling node data is not performed and a dummy value is 
 #                 given on the T3S
 #  
 # --> raster.tif: a string that defines the path to TIF file from where the
@@ -53,35 +53,8 @@
 #////////////////////////////////////////////////////////////////////////
 
 import csv, sys, os, re
-
-#import own functions 
-import fily, gis, gets, build
+import fily, gis, gets, build               #import own functions 
 #////////////////////////////////////////////////////////////////////////
-
-#Import Qgis libraries 
-from qgis.core import *
-from qgis.processing import *
-from qgis.utils import *
-from qgis.analysis import *
-from PyQt5.QtCore import QVariant
-
-##  Start QGIS  ##
-QgsApplication.setPrefixPath('/usr', True)
-QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
-qgs = QgsApplication([], True)
-qgs.initQgis()
-
-#Add plugins and processing algorithms
-sys.path.append('/usr/share/qgis/python/plugins/')
-import processing
-from processing.core.Processing import Processing
-
-#Add native functions
-Processing.initialize()
-qgs.processingRegistry().addProvider(QgsNativeAlgorithms())
-
-#Start QGIS Project
-project = QgsProject.instance()
 
 #Clean temporal files
 fily.touchFolder("../.Temp")
@@ -109,15 +82,99 @@ xCoord_MSH = gets.getColumnContents(Nodes_MSH,2)
 yCoord_MSH = gets.getColumnContents(Nodes_MSH,3)
 
 #Save a temporal CSV file with the X,Y coordinates
+csvFilePath = "../.Temp/CSV.csv"
+fily.resetFile(csvFilePath,"T3S")
+XYcsvFile   = build.buildCSV_2Col(xCoord_MSH,yCoord_MSH)
+fily.appendFile(XYcsvFile,csvFilePath,False)
 
-#Sample the raster onto the mesh nodes saved on the temporal CSV
-#if execMode in [""]:
-    #BLABLABLA
-#elif:
-    #BLABLABLA
+### Retrieves SHP Conversor Mode
+#### -bott | BOTTOM                     : Elevation Model
+#### -fric | BOTTOM FRICTION            : Raster Friction
+#### -both | BOTTOM & BOTTOM FRICTION   : Both Rasters
+#### -none | NONE                       : No Attribute
+execMode = str(sys.argv[3]).lower()
 
-#Build T3S Node List
-Nodes_T3S  = build.buildT3S_3Col(xCoord_MSH,yCoord_MSH,xCoord_MSH)
+if execMode in ["--bott"]:
+    pathToTIFFile = str(sys.argv[4])            #TIF  input file
+
+    #Sample the raster onto the mesh nodes saved on the temporal CSV
+    sampledRasterFile = "../.Temp/SampledBottom.csv"
+    gis.sampleRaster(csvFilePath,pathToTIFFile,sampledRasterFile)
+
+    #Get BOTTOM data column from a DEM
+    zBottom = gets.getCommaFile(sampledRasterFile,col=2)
+    zBottom = zBottom[1:]
+    
+    nAttribute = ["1"]
+    whichAttri = ["BOTTOM"]
+
+if execMode in ["--fric"]:
+    pathToFRIFile = str(sys.argv[4])            #TIF  input file
+
+    #Rasterize the friction polygon SHP to avoid repeated values
+    rasterizedFrictionFile = "../.Temp/SampledFriction.tif"
+    gis.rasterPoly(pathToFRIFile,rasterizedFrictionFile,"FRICTION")
+    
+    #Sample the raster onto the mesh nodes saved on the temporal CSV
+    sampledFrictionFile = "../.Temp/SampledFriction.csv"
+    gis.sampleRaster(csvFilePath,rasterizedFrictionFile,sampledFrictionFile)
+    
+    #Get BOTTOM FRICTION data column from a SHP Polygon
+    fBottom = gets.getCommaFile(sampledFrictionFile,col=2)
+    zBottom = fBottom[1:]
+    
+    #Keywords for the T3S header
+    nAttribute = ["1"]
+    whichAttri = ["BOTTOM FRICTION"]
+
+elif execMode in ["--both"]:
+    pathToDEMFile = str(sys.argv[4])            #TIF  input file
+    pathToFRIFile = str(sys.argv[5])            #SHP  input file
+
+    #Sample the raster onto the mesh nodes saved on the temporal CSV
+    sampledRasterFile = "../.Temp/SampledBottom.csv"
+    gis.sampleRaster(csvFilePath,pathToDEMFile,sampledRasterFile)
+
+    #Get BOTTOM data column from a sampled file
+    zBottom = gets.getCommaFile(sampledRasterFile,col=2)
+    zBottom = zBottom[1:]
+
+    #Rasterize the friction polygon SHP to avoid repeated values
+    rasterizedFrictionFile = "../.Temp/SampledFriction.tif"
+    gis.rasterPoly(pathToFRIFile,rasterizedFrictionFile,"FRICTION")
+    
+    #Sample the raster onto the mesh nodes saved on the temporal CSV
+    sampledFrictionFile = "../.Temp/SampledFriction.csv"
+    gis.sampleRaster(csvFilePath,rasterizedFrictionFile,sampledFrictionFile)
+    
+    #Get BOTTOM FRICTION data column from a SHP Polygon
+    fBottom = gets.getCommaFile(sampledFrictionFile,col=2)
+    fBottom = fBottom[1:]
+
+    #Merge BOTTOM and BOTTOM FRICTION
+    zfValue = []
+    try:
+        for i in range(len(fBottom)):
+            zfValue.append(str(zBottom[i]) + " " + str(fBottom[i]))
+        zBottom = zfValue
+    except IndexError:
+        "Frction Map has overlying features. Mesh nodes with multiple BOTTOM FRICTION values :("
+
+    #Keywords for the T3S header
+    nAttribute = ["1","2"]
+    whichAttri = ["BOTTOM","BOTTOM FRICTION"]
+
+elif execMode in ["--none",""]:  
+    #Insert a dummy BOTTOM value
+    zBottom = ["0"]*len(xCoord_MSH)
+
+    #Build T3S Node List
+    Nodes_T3S  = build.buildT3S_3Col(xCoord_MSH,yCoord_MSH,zBottom)
+
+    #Keywords for the T3S header
+    nAttribute = "1"
+    whichAttri = "NONE"
+
 
 #Extract Elements from the MSH File
 startElements = gets.getLineIndex(Raw_MSH,"$Elements")
@@ -133,14 +190,17 @@ p1Elements_MSH = gets.getColumnContents(Triangles_MSH,6)
 p2Elements_MSH = gets.getColumnContents(Triangles_MSH,7)
 p3Elements_MSH = gets.getColumnContents(Triangles_MSH,8)
 
+#Build T3S Node List
+Nodes_T3S  = build.buildT3S_3Col(xCoord_MSH,yCoord_MSH,zBottom)
+
 #Build T3S Element List
 Elements_T3S  = build.buildT3S_3Col(p1Elements_MSH,p2Elements_MSH,p3Elements_MSH)
 
 #Build T3S Header
-Header_T3S  = build.buildT3S_Header(manyNodes,manyElements)
+Header_T3S  = build.buildT3S_Header(manyNodes,manyElements,nAttribute,whichAttri)
 
 #Write T3S Files
-fily.appendFile(Header_T3S,pathToT3SFile,True)       #Header
+fily.appendFile(Header_T3S,pathToT3SFile,True)       #Header1
 fily.appendFile(Nodes_T3S,pathToT3SFile)             #Nodes
 fily.appendFile(Elements_T3S,pathToT3SFile)          #Triangles
 

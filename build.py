@@ -63,8 +63,21 @@ def buildT3S_3Col(Col1,Col2,Col3):
         T3S.append(line)
     return(T3S)
 
+###   Builds a list of two columns separated by a comma in CSV format
+def buildCSV_2Col(Col1,Col2):
+    T3S = ["Xm,Ym"]
+    for i in range(len(Col1)):
+        line = str(Col1[i]) + "," + str(Col2[i])
+        T3S.append(line)
+    return(T3S)
+
+
 ###   Generates the Header for the T3S file
-def buildT3S_Header(nNodes,nElements):
+def buildT3S_Header(nNodes,nElements,nAtrib,Atrib):
+    AtribLines = "#"
+    for i in range(len(nAtrib)):
+        AtribLines+="\n:AttributeName " + str(nAtrib[i]) + " " + str(Atrib[i])
+
     header = "#########################################################################\
         \n:FileType t3s  ASCII  EnSim 1.0\
         \n# Edwin Hydraulics Centre/Saavedra Research Council (~c~) 1111-2222\
@@ -78,9 +91,9 @@ def buildT3S_Header(nNodes,nElements):
         \n#------------------------------------------------------------------------\
         \n:SourceFile   Z:file.excel\
         \n#\
-        \n#\
-        \n:AttributeName 1 BOTTOM FRICTION\
-        \n#\
+        \n#" + \
+        AtribLines + \
+        "\n#\
         \n:NodeCount " + str(nNodes) +"\
         \n:ElementCount " + str(nElements) + "\
         \n:ElementType  T3\

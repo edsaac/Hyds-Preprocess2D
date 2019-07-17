@@ -112,8 +112,8 @@ execMode = str(sys.argv[1]).lower()
 
 if   execMode in ["-p","--polygon"]:
     path2Polygon = str(sys.argv[2])                        #Outline Polygon SHP << INPUT
-    path2Line = "../.Temp/1.OutlineLine.shp"     #Outline Line SHP path
-    path2Vertex = "../.Temp/2.OutlineVertex.shp" #Outline Vertices SHP path
+    path2Line = "../.Temp/1.OutlineLine.shp"               #Outline Line SHP path
+    path2Vertex = "../.Temp/2.OutlineVertex.shp"           #Outline Vertices SHP path
     path2VertexXY = str(sys.argv[3])                       #Output CSV + XY Coordinates >> OUTPUT
 
     fily.touchFile(path2Line)
@@ -128,9 +128,9 @@ if   execMode in ["-p","--polygon"]:
 elif execMode in ["-i","--heteropolygon"]:
     path2Polygon = str(sys.argv[2])                        #Outline Polygon SHP << INPUT
     path2SizeMap = str(sys.argv[3])                        #Outline Polygon SHP << INPUT
-    path2Line = "../.Temp/1.OutlineLine.shp"     #Outline Line SHP path
-    path2Vertex = "../.Temp/2.OutlineVertex.shp" #Outline Vertices SHP path
-    path2UnionV = "../.Temp/3.VertexMapped.shp"  #Outline Vertices SHP path
+    path2Line = "../.Temp/1.OutlineLine.shp"               #Outline Line SHP path
+    path2Vertex = "../.Temp/2.OutlineVertex.shp"           #Outline Vertices SHP path
+    path2UnionV = "../.Temp/3.VertexMapped.shp"            #Outline Vertices SHP path
     path2VertexXY = str(sys.argv[4])                       #Output CSV + XY Coordinates >> OUTPUT
 
     print("\n\n1.1. Polygon to Lines")
@@ -146,7 +146,7 @@ elif execMode in ["-i","--heteropolygon"]:
 
 elif execMode in ["-l","--line"]:
     path2Line = str(sys.argv[2])                           #Outline Line SHP path
-    path2Vertex = "../.Temp/2.OutlineVertex.shp" #Outline Vertices SHP path
+    path2Vertex = "../.Temp/2.OutlineVertex.shp"           #Outline Vertices SHP path
     path2VertexXY = str(sys.argv[3])                       #Output CSV + XY Coordinates >> OUTPUT
 
     print("\n\n1.1. Lines to Vertices")

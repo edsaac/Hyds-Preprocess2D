@@ -12,7 +12,8 @@
             "console": "integratedTerminal",
             "args"   : [
                 "../GEO_Files/Boundari.msh",
-                "../T3S_Files/Boundari.t3s"]
+                "../T3S_Files/Boundari.t3s",
+                "--none"]
         },
 
         {
