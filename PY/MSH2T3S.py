@@ -52,7 +52,7 @@
 #
 #////////////////////////////////////////////////////////////////////////
 
-import csv, sys, os, re
+import csv, sys, os, re, shutil
 import fily, gis, gets, build               #import own functions 
 #////////////////////////////////////////////////////////////////////////
 
@@ -205,3 +205,6 @@ fily.appendFile(Nodes_T3S,pathToT3SFile)             #Nodes
 fily.appendFile(Elements_T3S,pathToT3SFile)          #Triangles
 
 print("MSH2T3S ~OK~: " + str(sys.argv[1]) + " > " + str(sys.argv[2]))
+
+#Delete temporal folder
+shutil.rmtree("../.Temp", ignore_errors=True)

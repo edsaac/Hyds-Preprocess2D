@@ -11,10 +11,10 @@ DEMTERRA="./ElevationModel/PALSAR_DEM.tif"
 FRICTION="./FrictionMap/FrictionMap.shp"
 
 ####PYTHON SCRIPTS ---
-PYSCRIPT="./Hyds-Preprocess2D"			#Location of scripts
+PYSCRIPT="../../PY"			#Location of scripts
 
 ####PATH TO GMSH
-GMSHBIN="~/Apps/gmsh-3.0.6/bin/gmsh"		#Location of GMSH
+GMSHBIN="/home/edwin/Apps/gmsh-3.0.6/bin/gmsh"		#Location of GMSH
 
 ####OUTPUTS  ---
 OUTFILE="./MyProject"				#Your Project Name
