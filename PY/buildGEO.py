@@ -10,7 +10,7 @@
 # 
 # Date:       July 8, 2019
 #
-# Modified:   July 10, 2019
+# Modified:   July 19, 2019
 #
 # Works on:   python3
 #
@@ -99,8 +99,12 @@ if execMode in ["-b", "--boundary"]:
     #This mode OVERWRITES a list of points as boundaries of a computational
     #   domain. The other execMode's APPEND to the GEO file.
 
-    rColumnID = "Rx_m"    #if the boundary was obtained as SHP2GEO h mode
-                          #  change to "R_m" if the b mode was used 
+    #Extract headers
+    headers = gets.getCommaFile(pathToCSVFile,row=0)
+    if "Rx_m" in headers:
+        rColumnID = "Rx_m"    #if the boundary was obtained as SHP2GEO -h mode
+    elif "R_m" in headers:
+        rColumnID = "R_m"     #if the boundary was obtained as SHP2GEO -b mode
     
     #Extract identification of points as a list
     iCoord = gets.getCommaFile(pathToCSVFile,col=gets.getColumn(iColumnID,pathToCSVFile))

@@ -23,7 +23,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args"   : [
-                "p",
+                "-p",
                 "../SHP_Files/RiverBanks.shp",
                 "../CSV_Files/RiverBanks.csv"]
         },
